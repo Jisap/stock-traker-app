@@ -1,5 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
+import NavItems from "./NavItems";
+import { User } from "lucide-react";
+import UserDropdown from "./UserDropdown";
 
 
 const Header = async () => {
@@ -19,9 +22,11 @@ const Header = async () => {
         
         <nav className="hidden sm:block">
           {/* Nav Items */}
+          <NavItems />
         </nav>
 
         {/* User Dropdown */}
+        <UserDropdown />
       </div>
     </header>
   )
