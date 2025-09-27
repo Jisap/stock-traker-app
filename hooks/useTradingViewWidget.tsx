@@ -9,11 +9,11 @@ import { useEffect, useRef } from "react"
  * se cargue una sola vez y se limpie correctamente al desmontar el componente.
  *
  * @param scriptUrl La URL del script principal de TradingView (ej. "https://s3.tradingview.com/tv.js").
- * @param config Un objeto con la configuración específica del widget de TradingView
- *               (ej. símbolo, tema, intervalo, etc.).
- * @param height La altura en píxeles que tendrá el contenedor del widget. Por defecto es 600px.
- * @returns Una referencia (`RefObject`) a un elemento HTMLDivElement. Esta referencia
- *          debe ser asignada a un `div` en el JSX del componente que utiliza el hook.
+ * @param config    Un objeto con la configuración específica del widget de TradingView
+ *                  (ej. símbolo, tema, intervalo, etc.).
+ * @param height    La altura en píxeles que tendrá el contenedor del widget. Por defecto es 600px.
+ * @returns         Una referencia (`RefObject`) a un elemento HTMLDivElement. Esta referencia
+ *                  debe ser asignada a un `div` en el JSX del componente que utiliza el hook.
  */
 const useTradingViewWidget = (
   scriptUrl: string,
