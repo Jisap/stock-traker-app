@@ -15,9 +15,9 @@ import ReactCountryFlag from 'react-country-flag'
  * Componente de campo de formulario para seleccionar un país con búsqueda.
  * Se integra con `react-hook-form` y utiliza `shadcn/ui` para la interfaz.
  * @param {CountrySelectProps} props - Propiedades para configurar el campo.
- * @param {Control} props.control - Objeto `control` de `react-hook-form`.
- * @param {string} props.name - Nombre del campo en el formulario.
- * @param {string} props.label - Etiqueta visible para el campo.
+ * @param {Control} props.control    - Objeto `control` de `react-hook-form`.
+ * @param {string} props.name        - Nombre del campo en el formulario.
+ * @param {string} props.label       - Etiqueta visible para el campo.
  * @param {FieldError} [props.error] - Objeto de error de `react-hook-form` si la validación falla.
  */
 const CountrySelectField = ({ control, name, label, error }: CountrySelectProps) => {
