@@ -1,6 +1,7 @@
 "use client"
 
 import FooterLink from '@/components/forms/FooterLink';
+import InputField from '@/components/forms/InputField';
 import { Button } from '@/components/ui/button';
 import React from 'react'
 import { useForm } from 'react-hook-form';
@@ -11,7 +12,7 @@ import { useForm } from 'react-hook-form';
 const signUp = () => {
 
   const {
-    register,
+    register,                               // método que "inscribe" un campo en el formulario. React-hook-form le inyecta las propiedades name, onChange, onBlur y ref
     handleSubmit,
     control,
     formState: { errors, isSubmitting },
@@ -45,6 +46,33 @@ const signUp = () => {
         className="space-y-5"
       >
         {/* Inputs */}
+        <InputField
+          name="fullName"
+          label="Full Name"
+          placeholder="John Doe"
+          register={register}
+          error={errors.fullName}
+          validation={{ required: 'Full name is required', minLength: 2 }}
+        />
+
+        <InputField
+          name="email"
+          label="Email"
+          placeholder="contact@jsmastery.com"
+          register={register}
+          error={errors.email}
+          validation={{ required: 'Email name is required', pattern: /^\w+@\w+\.\w+$/, message: 'Email address is required' }}
+        />
+
+        <InputField
+          name="password"
+          label="Password"
+          placeholder="Enter a strong password"
+          type="password"
+          register={register}
+          error={errors.password}
+          validation={{ required: 'Password is required', minLength: 8 }}
+        />
 
       </form>
 
