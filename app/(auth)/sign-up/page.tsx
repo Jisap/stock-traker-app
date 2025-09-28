@@ -82,6 +82,7 @@ const signUp = () => {
           label="Country"
           control={control}
           error={errors.country}
+          rules={{ required: 'El país es un campo obligatorio' }}
         />
 
         <SelectField
