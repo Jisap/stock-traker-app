@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useMemo } from 'react'
-import { Controller } from 'react-hook-form'
+import { Controller, Control, FieldError, RegisterOptions } from 'react-hook-form'
 import countryList from 'react-select-country-list'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
 import { Button } from '@/components/ui/button'
@@ -11,16 +11,25 @@ import { cn } from '@/lib/utils'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import ReactCountryFlag from 'react-country-flag'
 
+type CountrySelectProps = {
+  control: Control<any>;
+  name: string;
+  label: string;
+  error?: FieldError;
+  rules?: RegisterOptions;
+};
+
 /**
  * Componente de campo de formulario para seleccionar un país con búsqueda.
  * Se integra con `react-hook-form` y utiliza `shadcn/ui` para la interfaz.
  * @param {CountrySelectProps} props - Propiedades para configurar el campo.
- * @param {Control} props.control    - Objeto `control` de `react-hook-form`.
- * @param {string} props.name        - Nombre del campo en el formulario.
- * @param {string} props.label       - Etiqueta visible para el campo.
- * @param {FieldError} [props.error] - Objeto de error de `react-hook-form` si la validación falla.
+ * @param {Control<any>} props.control    - Objeto `control` de `react-hook-form`.
+ * @param {string} props.name             - Nombre del campo en el formulario.
+ * @param {string} props.label            - Etiqueta visible para el campo.
+ * @param {FieldError} [props.error]      - Objeto de error de `react-hook-form` si la validación falla.
+ * @param {RegisterOptions} [props.rules] - Reglas de validación de `react-hook-form`.
  */
-const CountrySelectField = ({ control, name, label, error }: CountrySelectProps) => {
+const CountrySelectField = ({ control, name, label, error, rules }: CountrySelectProps) => {
   
   // Estado para controlar la visibilidad del Popover (menú desplegable).
   const [open, setOpen] = useState(false);                           // Estado para controlar la visibilidad del Popover (menú desplegable).
@@ -35,7 +44,7 @@ const CountrySelectField = ({ control, name, label, error }: CountrySelectProps)
       <Controller
         name={name}                                                 // Nombre del campo en el formulario.
         control={control}                                           // Controla el estado del campo.
-        rules={{ required: 'Country is required' }}                 // Regla de validación: el campo es obligatorio.
+        rules={rules}                                               // Reglas de validación personalizables.
         render={({ field }) => (
           // Componente Popover que actúa como contenedor del menú desplegable.
           <Popover open={open} onOpenChange={setOpen}>
