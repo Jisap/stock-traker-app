@@ -10,6 +10,12 @@ export const transporter = nodemailer.createTransport({
   }
 })
 
+transporter.verify().then(() => {
+  console.info("SMTP ready")
+}).catch((err) => {
+  console.error("SMTP config error", err)
+})
+
 export const sendWelcomeEmail = async ({ email, name, intro }: WelcomeEmailData) => {
   const htmlTemplate = WELCOME_EMAIL_TEMPLATE
     .replace('{{name}}', name)

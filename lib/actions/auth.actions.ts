@@ -18,10 +18,11 @@ export const signUpWithEmail = async ({ email, password, fullName, country, inve
     // La palabra clave `await` aquí solo espera la confirmación de que Inngest recibió el evento.
     // La ejecución de la función asociada (enviar el email) ocurre de forma asíncrona.
     if (response) {
-      await inngest.send({
+      const sendResult =await inngest.send({
         name: 'app/user.created',
         data: { email, name: fullName, country, investmentGoals, riskTolerance, preferredIndustry }
       })
+      console.info("Inngest event sent", sendResult)
     }
     
     // Retorna éxito al cliente. La experiencia de usuario es rápida porque no esperamos a que se envíe el email.
