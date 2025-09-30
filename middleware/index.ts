@@ -9,6 +9,8 @@ import { getSessionCookie } from "better-auth/cookies";
  * @param {NextRequest} request - El objeto de solicitud entrante.
  * @returns {NextResponse} Una respuesta de Next.js (redirección o continuación).
  */
+
+
 export async function middleware(request: NextRequest) {
   // Intenta obtener la cookie de sesión del usuario de la solicitud.
   // `getSessionCookie` de `better-auth/cookies` se encarga de leer la cookie
