@@ -5,7 +5,7 @@ import { User } from "lucide-react";
 import UserDropdown from "./UserDropdown";
 
 
-const Header = async () => {
+const Header = async ({user}: {user: User}) => {
 
   return (
     <header className="sticky top-0 header">
@@ -26,7 +26,7 @@ const Header = async () => {
         </nav>
 
         {/* User Dropdown */}
-        <UserDropdown />
+        <UserDropdown user={user} />
       </div>
     </header>
   )
