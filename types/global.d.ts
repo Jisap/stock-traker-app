@@ -1,4 +1,13 @@
 declare global {
+
+  /**
+ * Representa un usuario con la información mínima para enviar correos de noticias.
+ */
+  type UserForNewsEmail = {
+    id: string;
+    email: string;
+    name: string;
+  };
   
   type SignInFormData = {
     email: string;
