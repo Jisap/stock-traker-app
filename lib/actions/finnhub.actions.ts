@@ -1,5 +1,7 @@
 "use server"
 
+import { cache } from "react";
+import { POPULAR_STOCK_SYMBOLS } from "../constants";
 import { formatArticle, getDateRange, validateArticle } from "../utils";
 
 // Constantes para la API de Finnhub.
@@ -133,3 +135,108 @@ export async function getNews(symbols?: string[]): Promise<MarketNewsArticle[]> 
     throw new Error('Failed to fetch news');
   }
 }
+
+/**
+ * Busca acciones por un término de búsqueda o devuelve una lista de acciones populares si no se proporciona un término.
+ * Es una Server Action que se ejecuta en el servidor y utiliza `cache` de React para memoizar los resultados
+ * durante el ciclo de vida de una petición, evitando búsquedas duplicadas.
+ *
+ * @param {string} [query] - El término de búsqueda para las acciones.
+ * @returns {Promise<StockWithWatchlistStatus[]>} Una promesa que se resuelve con un array de acciones.
+ */
+
+export const searchStocks = cache(async (query?: string): Promise<StockWithWatchlistStatus[]> => {
+  try {
+    
+    const token = process.env.FINNHUB_API_KEY ?? NEXT_PUBLIC_FINNHUB_API_KEY;                                    // 1. OBTENER LA CLAVE DE LA API
+    if (!token) {
+      
+      console.error('Error in stock search:', new Error('FINNHUB API key is not configured'));                   // Si no hay token, se registra un error y se devuelve un array vacío para no romper la aplicación.
+      return [];
+    }
+
+    const trimmed = typeof query === 'string' ? query.trim() : '';                                               // Limpia el término de búsqueda de espacios en blanco.
+
+    let results: FinnhubSearchResult[] = [];
+
+      
+    if (!trimmed) {                                                                                               // 2. LÓGICA DE BÚSQUEDA. Si no hay término de búsqueda, se obtienen las acciones populares.
+      
+      const top = POPULAR_STOCK_SYMBOLS.slice(0, 10);                                                             // Se toman los primeros 10 símbolos de la lista de acciones populares.
+      
+      const profiles = await Promise.all(                                                                         // Se realizan peticiones en paralelo para obtener el perfil de cada acción.
+        top.map(async (sym) => {
+          try {
+            const url = `${FINNHUB_BASE_URL}/stock/profile2?symbol=${encodeURIComponent(sym)}&token=${token}`;
+            
+            const profile = await fetchJSON<any>(url, 3600);                                                      // Se cachea el resultado durante 1 hora (3600s) para optimizar. 
+            return { sym, profile } as { sym: string; profile: any };
+          
+          } catch (e) {                                                                                           // Si una petición falla, se registra el error y se continúa con las demás.
+            
+            console.error('Error fetching profile2 for', sym, e);
+            return { sym, profile: null } as { sym: string; profile: any };
+          }
+        })
+      );
+   
+      results = profiles                                                                                          // Se transforman los perfiles obtenidos al formato `FinnhubSearchResult`.
+        .map(({ sym, profile }) => {
+          const symbol = sym.toUpperCase();
+          const name: string | undefined = profile?.name || profile?.ticker || undefined;
+          const exchange: string | undefined = profile?.exchange || undefined;
+          
+          if (!name) return undefined;                                                                            // Si no hay nombre, se descarta el resultado.
+
+          const r: FinnhubSearchResult = {                                                                        // Se construye el objeto final. Este array puede tener objetos FinnHubSearchResult como valores undefined
+            symbol,
+            description: name,
+            displaySymbol: symbol,
+            type: 'Common Stock',
+          };
+          // Truco: Se adjunta el 'exchange' al objeto de forma interna para pasarlo
+          // a la siguiente fase de mapeo, ya que `FinnhubSearchResult` no lo incluye.
+          (r as any).__exchange = exchange;
+          return r;
+        })
+        .filter((x): x is FinnhubSearchResult => Boolean(x));                                                      // Se filtran los resultados que no se pudieron procesar (los undefined). Solo los objetos (x) que son FinnHubSearchResult son devueltos.
+    } else {
+      const url = `${FINNHUB_BASE_URL}/search?q=${encodeURIComponent(trimmed)}&token=${token}`;                    // Si hay un término de búsqueda, se usa el endpoint de búsqueda de Finnhub.
+      
+      const data = await fetchJSON<FinnhubSearchResponse>(url, 1800);                                              // Se cachea el resultado durante 30 minutos (1800s).
+      results = Array.isArray(data?.result) ? data.result : [];
+    }
+
+    
+    
+    const mapped: StockWithWatchlistStatus[] = results                                                             // 3. MAPEO FINAL Y NORMALIZACIÓN
+      .map((r) => {                                                                                                // Se mapean los resultados (ya sean de populares o de búsqueda) al tipo final `StockWithWatchlistStatus`.
+        
+        const upper = (r.symbol || '').toUpperCase();                                                              // Normalización de datos. 1º si existe un symbol se pasa a mayúsculas y sino existe se sustituye por ""
+        const name = r.description || upper;                                                                       // Luego se toma el nombre o el símbolo si no existe el nombre.
+        
+        const exchangeFromDisplay = (r.displaySymbol as string | undefined) || undefined;                          // Despues se intenta normalizar la BOLSA (Exchange). 1º Se intenta obtener el 'exchange' de `r.displaySymbol`
+        const exchangeFromProfile = (r as any).__exchange as string | undefined;                                   // Si no lo encuentra, intenta obtenerlo de `__exchange`, la propiedad interna que añadimos para las acciones populares.
+        const exchange = exchangeFromDisplay || exchangeFromProfile || 'US';                                       // Si sigue sin encontrarlo, asume 'US'(bolsas de Estados Unidos) como valor por defecto.
+        
+        const type = r.type || 'Stock';                                                                            // 4. Normalizar el TIPO
+
+        
+        const item: StockWithWatchlistStatus = {                                                                   // 5º Construir el Objeto Final Normalizado
+          symbol: upper,
+          name,
+          exchange,
+          type,
+          isInWatchlist: false, // Por defecto, no está en la watchlist.
+        };
+        return item;
+      })
+      
+      .slice(0, 15);                                                                                               // Se limita el resultado a un máximo de 15 elementos.
+
+    return mapped;
+  } catch (err) {
+    console.error('Error in stock search:', err);                                                                  // Manejo de errores
+    return [];
+  }
+});
