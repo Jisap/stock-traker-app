@@ -325,6 +325,7 @@
 
   .watchlist {
     @apply lg:col-span-2 space-y-8;
+    @apply xl:col-span-2 space-y-8;
   }
 
   .watchlist-alerts {

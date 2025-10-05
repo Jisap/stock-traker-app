@@ -94,6 +94,26 @@ declare global {
     isInWatchlist: boolean;
   };
 
+  type WatchlistItem = {
+    symbol: string;
+    company: string;
+    price: number;
+    change: number;
+    changePercent: number;
+    marketCap: number;
+    peRatio: number;
+  };
+
+  type FinnhubQuote = {
+    c: number; // Current price
+    d: number; // Change
+    dp: number; // Percent change
+    h: number; // High price of the day
+    l: number; // Low price of the day
+    o: number; // Open price of the day
+    pc: number; // Previous close price
+  };
+
   type FinnhubSearchResult = {
     symbol: string;
     description: string;

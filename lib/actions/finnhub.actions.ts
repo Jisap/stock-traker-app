@@ -1,6 +1,7 @@
 "use server"
 
 import { cache } from "react";
+import { unstable_noStore as noStore } from "next/cache";
 import { POPULAR_STOCK_SYMBOLS } from "../constants";
 import { formatArticle, getDateRange, validateArticle } from "../utils";
 
@@ -133,6 +134,29 @@ export async function getNews(symbols?: string[]): Promise<MarketNewsArticle[]> 
     console.error('getNews error:', err);
     // Lanza un error genérico para que el componente que la llama pueda manejarlo.
     throw new Error('Failed to fetch news');
+  }
+}
+
+/**
+ * Obtiene la cotización en tiempo real para un símbolo de acción específico.
+ * @param {string} symbol - El símbolo de la acción (ej. 'AAPL').
+ * @returns {Promise<FinnhubQuote>} Una promesa que se resuelve con los datos de la cotización.
+ */
+export async function getQuote(symbol: string): Promise<FinnhubQuote> {
+  // noStore() previene que esta petición sea cacheada, asegurando datos en tiempo real.
+  noStore();
+  try {
+    const token = process.env.FINNHUB_API_KEY ?? NEXT_PUBLIC_FINNHUB_API_KEY;
+    if (!token) {
+      throw new Error('FINNHUB API key is not configured');
+    }
+
+    const url = `${FINNHUB_BASE_URL}/quote?symbol=${encodeURIComponent(symbol)}&token=${token}`;
+    // No usamos caché (`revalidateSeconds`) para obtener siempre el último precio.
+    return await fetchJSON<FinnhubQuote>(url);
+  } catch (err) {
+    console.error(`getQuote error for ${symbol}:`, err);
+    throw new Error(`Failed to fetch quote for ${symbol}`);
   }
 }
 

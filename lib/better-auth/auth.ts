@@ -47,3 +47,9 @@ export const getAuth = async () => {
 // Esto crea un singleton que se compartirá en todo el ámbito del servidor de la aplicación,
 // asegurando que `getAuth` se ejecute solo una vez al iniciar el servidor.
 export const auth = await getAuth();
+
+
+// Re-exportamos el método `getSession` del objeto `auth` como una función nombrada.
+// Esto nos permite importarlo de forma limpia en otros archivos del servidor
+// con `import { getSession } from '@/lib/better-auth/auth'`.
+export const getSession = auth.api.getSession;

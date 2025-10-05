@@ -1,5 +1,8 @@
 import TradingViewWidget from "@/components/TradingViewWidget";
 import WatchlistButton from "@/components/WatchlistButton";
+import { getWatchlistSymbolsByEmail, updateWatchlist } from "@/lib/actions/watchlist.actions";
+import { getSession } from "@/lib/better-auth/auth";
+import { headers } from "next/headers";
 
 import {
   SYMBOL_INFO_WIDGET_CONFIG,
@@ -12,6 +15,13 @@ import {
 
 export default async function StockDetails({ params }: StockDetailsPageProps) {
   const { symbol } = await params;
+  const session = await getSession({ headers: await headers() });
+  const user = session?.user;
+
+  // Obtenemos la watchlist del usuario para saber si este símbolo ya está guardado.
+  const watchlistSymbols = user?.email ? await getWatchlistSymbolsByEmail(user.email) : [];
+  const isInWatchlist = watchlistSymbols.includes(symbol.toUpperCase());
+
   const scriptUrl = `https://s3.tradingview.com/external-embedding/embed-widget-`;
 
   return (
@@ -46,7 +56,8 @@ export default async function StockDetails({ params }: StockDetailsPageProps) {
             <WatchlistButton 
               symbol={symbol.toUpperCase()} 
               company={symbol.toUpperCase()} 
-              isInWatchlist={false} 
+              isInWatchlist={isInWatchlist}
+              onWatchlistChange={updateWatchlist}
             />
           </div>
 
