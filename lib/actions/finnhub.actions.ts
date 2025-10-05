@@ -3,6 +3,9 @@
 import { cache } from "react";
 import { unstable_noStore as noStore } from "next/cache";
 import { POPULAR_STOCK_SYMBOLS } from "../constants";
+import { getSession } from "../better-auth/auth";
+import { headers } from "next/headers";
+import { getWatchlistSymbolsByEmail } from "./watchlist.actions";
 import { formatArticle, getDateRange, validateArticle } from "../utils";
 
 // Constantes para la API de Finnhub.
@@ -170,6 +173,14 @@ export async function getQuote(symbol: string): Promise<FinnhubQuote> {
  */
 
 export const searchStocks = cache(async (query?: string): Promise<StockWithWatchlistStatus[]> => {
+
+  const session = await getSession({ headers: await headers() });                                                // Obtenemos la sesión del usuario para saber quién está haciendo la petición.
+  const user = session?.user;
+  
+  const watchlistSymbols = user?.email                                                                           // Obtenemos la lista de símbolos en la watchlist del usuario. Si no hay usuario, es un array vacío.
+    ? await getWatchlistSymbolsByEmail(user.email)
+    : [];
+    
   try {
     
     const token = process.env.FINNHUB_API_KEY ?? NEXT_PUBLIC_FINNHUB_API_KEY;                                    // 1. OBTENER LA CLAVE DE LA API
@@ -251,7 +262,7 @@ export const searchStocks = cache(async (query?: string): Promise<StockWithWatch
           name,
           exchange,
           type,
-          isInWatchlist: false, // Por defecto, no está en la watchlist.
+          isInWatchlist: watchlistSymbols.includes(upper), // Comprobamos si el símbolo está en la lista del usuario.
         };
         return item;
       })

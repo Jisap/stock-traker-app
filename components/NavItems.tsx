@@ -26,7 +26,7 @@ const NavItems = () => {
         if (href === '/search') return (
           <li key="search-trigger">
             {/* SearchCommand */}
-            <SearchCommand 
+            <SearchCommand
               renderAs='text'
               label="Search"
               initialStocks={[]}

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React from "react";
 
 // WatchlistButton es un botón reutilizable diseñado para que los usuarios puedan 
 // agregar o quitar una acción (stock) de su lista de seguimiento (watchlist)
@@ -8,41 +8,36 @@ import React, { useMemo, useState } from "react";
 
 const WatchlistButton = ({
   symbol,
-  company,
+  company, // No se usa actualmente, pero se mantiene para posible uso futuro
   isInWatchlist, // Por defecto es false
   showTrashIcon = false,
   type = "button",
-  onWatchlistChange,
+  onWatchlistChange, // action para actualizar el estado del watchlist
 }: WatchlistButtonProps) => {
 
-  const [added, setAdded] = useState<boolean>(!!isInWatchlist);   // Estado interno para saber si la acción está agregada.
+  const label = type === "icon" ? "" : (isInWatchlist ? "Remove from Watchlist" : "Add to Watchlist");
 
-  const label = useMemo(() => {                                   // Memoriza la etiqueta del botón. Cambia si el estado 'added' cambia.
-    if (type === "icon") return added ? "" : "";
-    return added ? "Remove from Watchlist" : "Add to Watchlist";
-  }, [added, type]);
-
-  const handleClick = () => {           // Cuando se hace click
-    const next = !added;                // Se invierte el estado actual.
-    setAdded(next);                     // Se actualiza el estado interno.
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => { // Cuando se hace click
+    e.stopPropagation();                // Evita que el evento se propague al Link padre.
+    const next = !isInWatchlist;        // Se invierte el estado actual.
     onWatchlistChange?.(symbol, next);  // Notifica al componente padre del cambio.
   };
 
   if (type === "icon") {
     return (
       <button
-        title={added ? `Remove ${symbol} from watchlist` : `Add ${symbol} to watchlist`}
-        aria-label={added ? `Remove ${symbol} from watchlist` : `Add ${symbol} to watchlist`}
-        className={`watchlist-icon-btn ${added ? "watchlist-icon-added" : ""}`}
+        title={isInWatchlist ? `Remove ${symbol} from watchlist` : `Add ${symbol} to watchlist`}
+        aria-label={isInWatchlist ? `Remove ${symbol} from watchlist` : `Add ${symbol} to watchlist`}
+        className={`watchlist-icon-btn ${isInWatchlist ? "watchlist-icon-added" : ""}`}
         onClick={handleClick}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
-          fill={added ? "#FACC15" : "none"}
+          fill={isInWatchlist ? "#FACC15" : "none"}
           stroke="#FACC15"
           strokeWidth="1.5"
-          className="watchlist-star"
+          className="watchlist-star h-4 w-4"
         >
           <path
             strokeLinecap="round"
@@ -55,8 +50,8 @@ const WatchlistButton = ({
   }
 
   return (
-    <button className={`watchlist-btn ${added ? "watchlist-remove" : ""}`} onClick={handleClick}>
-      {showTrashIcon && added ? (
+    <button className={`watchlist-btn ${isInWatchlist ? "watchlist-remove" : ""}`} onClick={handleClick}>
+      {showTrashIcon && isInWatchlist ? (
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"

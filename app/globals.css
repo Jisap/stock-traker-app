@@ -308,7 +308,7 @@
   }
 
   .watchlist-star {
-    @apply h-16 w-16 text-gray-500 mb-4;
+    @apply h-10 w-10 text-gray-500 mb-4;
   }
 
   .empty-title {

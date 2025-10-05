@@ -13,24 +13,27 @@ import { headers } from "next/headers";
  */
 export default async function WatchlistPage() {
 
-  // 1. Obtener la sesión del usuario.
-  const session = await getSession({ headers: await headers() });
+  
+  const session = await getSession({ headers: await headers() });           // 1. Obtener la sesión del usuario.
   const user = session?.user;
 
-  // 2. Si no hay usuario, no se puede mostrar nada.
+  
   if (!user?.email) {
-    return <div>Please log in to see your watchlist.</div>;
+    return <div>Please log in to see your watchlist.</div>;                 // 2. Si no hay usuario, no se puede mostrar nada.
   }
 
-  // 3. Obtener los items de la watchlist desde la base de datos.
-  const initialWatchlist = await getWatchlistByEmail(user.email);
   
-  // 4. Obtener los símbolos para buscar noticias.
-  const symbols = initialWatchlist.map(item => item.symbol);
+  const initialWatchlist = await getWatchlistByEmail(user.email);           // 3. Obtener los items de la watchlist desde la base de datos.
+  
+  
+  const symbols = initialWatchlist.map(item => item.symbol);                // 4. Obtener los símbolos para buscar noticias.
   const news = await getNews(symbols);
 
-  // 5. Renderizar el componente principal, pasándole la watchlist y las noticias.
-  return (
-    <Watchlist initialWatchlist={initialWatchlist} news={news} />
+  
+  return (                                                                  // 5. Renderizar el componente principal, pasándole la watchlist y las noticias.
+    <Watchlist 
+      initialWatchlist={initialWatchlist} 
+      news={news} 
+    />
   );
 }

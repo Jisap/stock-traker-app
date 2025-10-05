@@ -57,7 +57,7 @@ export default async function StockDetails({ params }: StockDetailsPageProps) {
               symbol={symbol.toUpperCase()} 
               company={symbol.toUpperCase()} 
               isInWatchlist={isInWatchlist}
-              onWatchlistChange={updateWatchlist}
+              onWatchlistChange={updateWatchlist} // Action para actualizar el estado del watchlist
             />
           </div>
 
